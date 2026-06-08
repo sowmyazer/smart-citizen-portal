@@ -19,7 +19,7 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://YOUR-FRONTEND.onrender.com'
+    'https://smart-citizen-portal-by-students.onrender.com'
   ],
   credentials: true,
 }));
