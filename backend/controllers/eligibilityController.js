@@ -8,9 +8,18 @@ const { asyncHandler } = require('../middleware/errorMiddleware');
 const checkEligibility = asyncHandler(async (req, res) => {
   const { age, gender, caste, occupation, annualIncome } = req.body;
 
-  if (!age || !caste || !occupation || annualIncome === undefined) {
+  // FIX 3: Added gender to the required-fields check (it was missing before,
+  //         so undefined gender was silently passed through, breaking genderMatch)
+  if (!age || !gender || !caste || !occupation || annualIncome === undefined) {
     res.status(400);
-    throw new Error('Please provide age, caste, occupation, and annual income');
+    throw new Error('Please provide age, gender, caste, occupation, and annual income');
+  }
+
+  // FIX 4: Validate gender is one of the accepted enum values
+  const validGenders = ['Male', 'Female', 'Other'];
+  if (!validGenders.includes(gender)) {
+    res.status(400);
+    throw new Error(`Invalid gender value. Must be one of: ${validGenders.join(', ')}`);
   }
 
   const activeSchemes = await Scheme.find({ status: 'Active' });
@@ -19,10 +28,14 @@ const checkEligibility = asyncHandler(async (req, res) => {
     // Age check
     const ageMatch = age >= scheme.minAge && age <= scheme.maxAge;
 
+    // FIX 5: genderEligibility could be null/undefined on old DB records saved
+    //         before the fix — treat missing value as 'All' (safe fallback)
+    const effectiveGender = scheme.genderEligibility || 'All';
     const genderMatch =
-  scheme.genderEligibility === 'All' ||
-  scheme.genderEligibility === gender;
-  // Income check
+      effectiveGender === 'All' ||
+      effectiveGender === gender;
+
+    // Income check
     const incomeMatch = annualIncome <= scheme.maxIncome;
 
     // Caste check

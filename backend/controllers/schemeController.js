@@ -63,20 +63,40 @@ const getSchemeById = asyncHandler(async (req, res) => {
 // @access  Admin
 const createScheme = asyncHandler(async (req, res) => {
   const {
-  schemeName, category, description, eligibilityCriteria,
-  minAge, maxAge, maxIncome, eligibleCastes, eligibleOccupations,
-  genderEligibility,
-  benefits, requiredDocuments, applyLink, status,
-} = req.body;
+    schemeName,
+    category,
+    description,
+    eligibilityCriteria,
+    minAge,
+    maxAge,
+    maxIncome,
+    eligibleCastes,
+    eligibleOccupations,
+    genderEligibility,
+    benefits,
+    requiredDocuments,
+    applyLink,
+    status,
+  } = req.body;
+
+  // FIX 6: Validate genderEligibility before saving — reject unknown values
+  //         instead of letting Mongoose silently fail or store a bad default
+  const validGenders = ['Male', 'Female', 'Other', 'All'];
+  const resolvedGender = genderEligibility && validGenders.includes(genderEligibility)
+    ? genderEligibility
+    : 'All';
 
   const scheme = await Scheme.create({
-   genderEligibility: genderEligibility || 'All',
-    schemeName, category, description, eligibilityCriteria,
+    schemeName,
+    category,
+    description,
+    eligibilityCriteria,
     minAge: minAge || 0,
     maxAge: maxAge || 120,
     maxIncome: maxIncome || 10000000,
     eligibleCastes: eligibleCastes || ['All'],
     eligibleOccupations: eligibleOccupations || ['All'],
+    genderEligibility: resolvedGender,   // always a valid enum value
     benefits,
     requiredDocuments: requiredDocuments || [],
     applyLink: applyLink || '',
@@ -100,6 +120,14 @@ const updateScheme = asyncHandler(async (req, res) => {
   if (!scheme) {
     res.status(404);
     throw new Error('Scheme not found');
+  }
+
+  // FIX 7: Sanitize genderEligibility on updates too — same guard as create
+  if (req.body.genderEligibility) {
+    const validGenders = ['Male', 'Female', 'Other', 'All'];
+    if (!validGenders.includes(req.body.genderEligibility)) {
+      req.body.genderEligibility = 'All';
+    }
   }
 
   scheme = await Scheme.findByIdAndUpdate(req.params.id, req.body, {

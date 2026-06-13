@@ -53,10 +53,12 @@ const schemeSchema = new mongoose.Schema({
     trim: true,
   },
   genderEligibility: {
-  type: String,
-  enum: ['Male', 'Female', 'Other', 'ASll'],
-  default: 'all'
-},
+    type: String,
+    // FIX 1: 'ASll' was a typo — corrected to 'All'
+    // FIX 2: default was 'all' (lowercase) — must exactly match an enum value
+    enum: ['Male', 'Female', 'Other', 'All'],
+    default: 'All',
+  },
   requiredDocuments: {
     type: [String],
     default: [],
