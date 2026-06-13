@@ -16,7 +16,13 @@ const AddScheme = () => {
   const [documents, setDocuments] = useState(['']);
 
   const { register, handleSubmit, formState: { errors } } = useForm({
-    defaultValues: { minAge: 0, maxAge: 120, maxIncome: 500000, status: 'Active' },
+    defaultValues: {
+      minAge: 0,
+      maxAge: 120,
+      maxIncome: 500000,
+      status: 'Active',
+      genderEligibility: 'All', // FIX 1: added to defaultValues so react-hook-form tracks it
+    },
   });
 
   const toggleCaste = (c) => {
@@ -150,6 +156,21 @@ const AddScheme = () => {
             </div>
           </div>
 
+          {/* Gender — FIX 2: replaced formData/handleChange with {...register()} */}
+          {/* FIX 3: option values now use correct casing to match backend enum    */}
+          <div>
+            <label className="label">Gender Eligibility</label>
+            <select
+              {...register('genderEligibility')}
+              className="input-field"
+            >
+              <option value="All">All</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
           {/* Caste */}
           <div>
             <label className="label">Eligible Castes *</label>
@@ -226,23 +247,7 @@ const AddScheme = () => {
               </button>
             </div>
           </div>
-              <div>
-  <label className="block text-sm font-medium mb-2">
-    Gender Eligibility
-  </label>
 
-  <select
-    name="genderEligibility"
-    value={formData.genderEligibility}
-    onChange={handleChange}
-    className="w-full border rounded-lg px-3 py-2"
-  >
-    <option value="all">All</option>
-    <option value="male">Male</option>
-    <option value="female">Female</option>
-    <option value="other">Other</option>
-  </select>
-</div>
           <div>
             <label className="label">Apply Link (URL)</label>
             <input {...register('applyLink')} className="input-field" placeholder="https://example.gov.in/apply" />
@@ -261,7 +266,12 @@ const AddScheme = () => {
         <div className="flex gap-3">
           <Link to="/admin/schemes" className="btn-secondary">Cancel</Link>
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Creating...</> : 'Create Scheme'}
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Creating...
+              </>
+            ) : 'Create Scheme'}
           </button>
         </div>
       </form>
