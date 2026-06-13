@@ -19,7 +19,10 @@ const checkEligibility = asyncHandler(async (req, res) => {
     // Age check
     const ageMatch = age >= scheme.minAge && age <= scheme.maxAge;
 
-    // Income check
+    const genderMatch =
+  scheme.genderEligibility === 'All' ||
+  scheme.genderEligibility === gender;
+  // Income check
     const incomeMatch = annualIncome <= scheme.maxIncome;
 
     // Caste check
@@ -32,7 +35,7 @@ const checkEligibility = asyncHandler(async (req, res) => {
       scheme.eligibleOccupations.includes('All') ||
       scheme.eligibleOccupations.includes(occupation);
 
-    return ageMatch && incomeMatch && casteMatch && occupationMatch;
+    return ageMatch && genderMatch && incomeMatch && casteMatch && occupationMatch;
   });
 
   // Save to history

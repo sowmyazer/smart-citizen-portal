@@ -52,6 +52,11 @@ const schemeSchema = new mongoose.Schema({
     required: [true, 'Benefits are required'],
     trim: true,
   },
+  genderEligibility: {
+  type: String,
+  enum: ['Male', 'Female', 'Other', 'ASll'],
+  default: 'all'
+},
   requiredDocuments: {
     type: [String],
     default: [],

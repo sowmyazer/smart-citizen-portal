@@ -226,7 +226,23 @@ const AddScheme = () => {
               </button>
             </div>
           </div>
+              <div>
+  <label className="block text-sm font-medium mb-2">
+    Gender Eligibility
+  </label>
 
+  <select
+    name="genderEligibility"
+    value={formData.genderEligibility}
+    onChange={handleChange}
+    className="w-full border rounded-lg px-3 py-2"
+  >
+    <option value="all">All</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    <option value="other">Other</option>
+  </select>
+</div>
           <div>
             <label className="label">Apply Link (URL)</label>
             <input {...register('applyLink')} className="input-field" placeholder="https://example.gov.in/apply" />

@@ -63,12 +63,14 @@ const getSchemeById = asyncHandler(async (req, res) => {
 // @access  Admin
 const createScheme = asyncHandler(async (req, res) => {
   const {
-    schemeName, category, description, eligibilityCriteria,
-    minAge, maxAge, maxIncome, eligibleCastes, eligibleOccupations,
-    benefits, requiredDocuments, applyLink, status,
-  } = req.body;
+  schemeName, category, description, eligibilityCriteria,
+  minAge, maxAge, maxIncome, eligibleCastes, eligibleOccupations,
+  genderEligibility,
+  benefits, requiredDocuments, applyLink, status,
+} = req.body;
 
   const scheme = await Scheme.create({
+   genderEligibility: genderEligibility || 'All',
     schemeName, category, description, eligibilityCriteria,
     minAge: minAge || 0,
     maxAge: maxAge || 120,
