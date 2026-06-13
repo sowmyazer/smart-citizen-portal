@@ -36,6 +36,9 @@ const EditScheme = () => {
           maxIncome: s.maxIncome,
           applyLink: s.applyLink,
           status: s.status,
+          // FIX 1: load saved genderEligibility into the form.
+          // Fallback to 'All' for old records that may have null/undefined.
+          genderEligibility: s.genderEligibility || 'All',
         });
         setSelectedCastes(s.eligibleCastes || ['All']);
         setSelectedOccupations(s.eligibleOccupations || ['All']);
@@ -81,6 +84,7 @@ const EditScheme = () => {
         minAge: Number(data.minAge),
         maxAge: Number(data.maxAge),
         maxIncome: Number(data.maxIncome),
+        // genderEligibility is already in data via register(), included via ...data
       };
       await schemeAPI.updateScheme(id, payload);
       toast.success('Scheme updated successfully!');
@@ -109,6 +113,7 @@ const EditScheme = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Basic Info */}
         <div className="card p-5 space-y-4">
           <h2 className="font-semibold text-slate-800">Basic Information</h2>
           <div>
@@ -136,8 +141,10 @@ const EditScheme = () => {
           </div>
         </div>
 
+        {/* Eligibility Parameters */}
         <div className="card p-5 space-y-4">
           <h2 className="font-semibold text-slate-800">Eligibility Parameters</h2>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="label">Min Age</label>
@@ -153,13 +160,27 @@ const EditScheme = () => {
             </div>
           </div>
 
+          {/* FIX 2: Gender field added — uses register() like all other fields.  */}
+          {/* Values exactly match backend enum: 'All','Male','Female','Other'     */}
+          <div>
+            <label className="label">Gender Eligibility</label>
+            <select {...register('genderEligibility')} className="input-field w-48">
+              <option value="All">All</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
           <div>
             <label className="label">Eligible Castes</label>
             <div className="flex flex-wrap gap-2">
               {CASTES.map((c) => (
                 <button key={c} type="button" onClick={() => toggleCaste(c)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                    selectedCastes.includes(c) ? 'bg-primary-600 border-primary-600 text-white' : 'border-slate-300 text-slate-600 hover:border-primary-400'
+                    selectedCastes.includes(c)
+                      ? 'bg-primary-600 border-primary-600 text-white'
+                      : 'border-slate-300 text-slate-600 hover:border-primary-400'
                   }`}>
                   {c}
                 </button>
@@ -173,7 +194,9 @@ const EditScheme = () => {
               {OCCUPATIONS.map((o) => (
                 <button key={o} type="button" onClick={() => toggleOccupation(o)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                    selectedOccupations.includes(o) ? 'bg-primary-600 border-primary-600 text-white' : 'border-slate-300 text-slate-600 hover:border-primary-400'
+                    selectedOccupations.includes(o)
+                      ? 'bg-primary-600 border-primary-600 text-white'
+                      : 'border-slate-300 text-slate-600 hover:border-primary-400'
                   }`}>
                   {o}
                 </button>
@@ -182,6 +205,7 @@ const EditScheme = () => {
           </div>
         </div>
 
+        {/* Documents & Links */}
         <div className="card p-5 space-y-4">
           <h2 className="font-semibold text-slate-800">Documents & Apply Link</h2>
           <div>
@@ -189,15 +213,20 @@ const EditScheme = () => {
             <div className="space-y-2">
               {documents.map((doc, i) => (
                 <div key={i} className="flex gap-2">
-                  <input type="text" value={doc} onChange={(e) => updateDoc(i, e.target.value)} className="input-field flex-1" placeholder="e.g., Aadhaar Card" />
+                  <input type="text" value={doc} onChange={(e) => updateDoc(i, e.target.value)}
+                    className="input-field flex-1" placeholder="e.g., Aadhaar Card" />
                   {documents.length > 1 && (
                     <button type="button" onClick={() => removeDoc(i)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                   )}
                 </div>
               ))}
-              <button type="button" onClick={addDoc} className="text-primary-600 text-sm font-medium hover:underline">+ Add document</button>
+              <button type="button" onClick={addDoc} className="text-primary-600 text-sm font-medium hover:underline">
+                + Add document
+              </button>
             </div>
           </div>
           <div>
@@ -216,7 +245,9 @@ const EditScheme = () => {
         <div className="flex gap-3">
           <Link to="/admin/schemes" className="btn-secondary">Cancel</Link>
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Updating...</> : 'Update Scheme'}
+            {loading
+              ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Updating...</>
+              : 'Update Scheme'}
           </button>
         </div>
       </form>
